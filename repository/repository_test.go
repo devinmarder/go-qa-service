@@ -11,7 +11,7 @@ func TestLocalRepository_UpdateServiceCoverage(t *testing.T) {
 	}
 	type args struct {
 		sn  string
-		cov int
+		cov float32
 	}
 	tests := []struct {
 		name     string
