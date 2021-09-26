@@ -18,12 +18,11 @@ type Body struct {
 
 func updateHandler(w http.ResponseWriter, r *http.Request) {
 	var body Body
-	err := json.NewDecoder(r.Body).Decode(&body)
-	repo.UpdateServiceCoverage(body.Payload.ServiceName, body.Payload.Coverage)
-	if err != nil {
+	if err := json.NewDecoder(r.Body).Decode(&body); err != nil {
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}
+	repo.UpdateServiceCoverage(body.Payload.ServiceName, body.Payload.Coverage)
 	fmt.Fprintf(w, "service name: %v \ncoverage: %v", body.Payload.ServiceName, body.Payload.Coverage)
 }
 
@@ -33,9 +32,8 @@ func webHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func apiHandler(w http.ResponseWriter, r *http.Request) {
-	//<get list of services and their coverages from repository>
-	//<generate json encoded response>
-	fmt.Fprint(w, `{"services": [{"service_name": "example_name", "coverage": 23}]`)
+	b, _ := json.Marshal(repo.ListServiceCoverage())
+	fmt.Fprint(w, string(b))
 }
 
 func main() {
