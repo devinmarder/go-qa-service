@@ -7,11 +7,6 @@ import (
 	"os"
 )
 
-type ServiceStats struct {
-	ServiceName string `json:"service_name"`
-	Coverage    string `json:"coverage"`
-}
-
 func updateHandler(w http.ResponseWriter, r *http.Request) {
 	//<extract service and coverage stats>
 	//<write service and coverage stats to repository>
