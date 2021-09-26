@@ -1,20 +1,33 @@
 package main
 
 import (
+	"encoding/json"
 	"fmt"
 	"log"
 	"net/http"
 	"os"
+
+	"github.com/devinmarder/go-qa-service/repository"
 )
 
+var repo repository.LocalRepository
+
+type Body struct {
+	Payload repository.ServiceCoverage `json:"payload"`
+}
+
 func updateHandler(w http.ResponseWriter, r *http.Request) {
-	//<extract service and coverage stats>
-	//<write service and coverage stats to repository>
-	fmt.Fprintf(w, "updated service")
+	var body Body
+	err := json.NewDecoder(r.Body).Decode(&body)
+	repo.UpdateServiceCoverage(body.Payload.ServiceName, body.Payload.Coverage)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+	fmt.Fprintf(w, "service name: %v \ncoverage: %v", body.Payload.ServiceName, body.Payload.Coverage)
 }
 
 func webHandler(w http.ResponseWriter, r *http.Request) {
-	//<get list of services and their coverages from repository>
 	//<generate html formatted response>
 	fmt.Fprintf(w, "<h1>list of services and their coverage</h1>")
 }
