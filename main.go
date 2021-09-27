@@ -27,8 +27,12 @@ func updateHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func webHandler(w http.ResponseWriter, r *http.Request) {
-	//<generate html formatted response>
-	fmt.Fprintf(w, "<h1>list of services and their coverage</h1>")
+	fmt.Fprint(w, "<h1>Services QA Status</h1>")
+	fmt.Fprint(w, "<dl>")
+	for _, serviceCoverage := range repo.ListServiceCoverage() {
+		fmt.Fprintf(w, "<dt>%v</dt><dd>coverage: %v</dd>", serviceCoverage.ServiceName, serviceCoverage.Coverage)
+	}
+	fmt.Fprint(w, "<dl>")
 }
 
 func apiHandler(w http.ResponseWriter, r *http.Request) {
