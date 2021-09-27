@@ -27,10 +27,9 @@ func updateHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func webHandler(w http.ResponseWriter, r *http.Request) {
-	fmt.Fprint(w, "<h1>Services QA Status</h1>")
-	fmt.Fprint(w, "<dl>")
+	fmt.Fprint(w, "<h1>Services QA Status</h1> <dl> <hr>")
 	for _, serviceCoverage := range repo.ListServiceCoverage() {
-		fmt.Fprintf(w, "<dt>%v</dt><dd>coverage: %v</dd>", serviceCoverage.ServiceName, serviceCoverage.Coverage)
+		fmt.Fprintf(w, "<dt>%v</dt><dd>coverage: %v</dd> <hr>", serviceCoverage.ServiceName, serviceCoverage.Coverage)
 	}
 	fmt.Fprint(w, "<dl>")
 }
