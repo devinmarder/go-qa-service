@@ -10,8 +10,7 @@ func TestLocalRepository_UpdateServiceCoverage(t *testing.T) {
 		Services []ServiceCoverage
 	}
 	type args struct {
-		sn  string
-		cov float32
+		ServiceCoverage
 	}
 	tests := []struct {
 		name     string
@@ -22,13 +21,13 @@ func TestLocalRepository_UpdateServiceCoverage(t *testing.T) {
 		{
 			"add new service",
 			fields{},
-			args{"service1", 75},
+			args{ServiceCoverage{ServiceName: "service1", Coverage: 75}},
 			fields{Services: []ServiceCoverage{{ServiceName: "service1", Coverage: 75}}},
 		},
 		{
 			"update existing service",
 			fields{Services: []ServiceCoverage{{ServiceName: "service1", Coverage: 25}}},
-			args{"service1", 75},
+			args{ServiceCoverage{ServiceName: "service1", Coverage: 75}},
 			fields{Services: []ServiceCoverage{{ServiceName: "service1", Coverage: 75}}},
 		},
 	}
@@ -37,7 +36,7 @@ func TestLocalRepository_UpdateServiceCoverage(t *testing.T) {
 			lr := &LocalRepository{
 				Services: tt.initial.Services,
 			}
-			lr.UpdateServiceCoverage(tt.args.sn, tt.args.cov)
+			lr.UpdateServiceCoverage(tt.args.ServiceCoverage)
 			if !reflect.DeepEqual(lr.Services, tt.expected.Services) {
 				t.Fatalf("expected state: %v \n actual state: %v ", tt.expected, lr.Services)
 			}

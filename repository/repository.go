@@ -2,11 +2,9 @@ package repository
 
 import (
 	"context"
-	"fmt"
 
 	"github.com/aws/aws-sdk-go-v2/feature/dynamodb/attributevalue"
 	"github.com/aws/aws-sdk-go-v2/service/dynamodb"
-	"github.com/aws/aws-sdk-go-v2/service/dynamodb/types"
 )
 
 type ServiceCoverage struct {
@@ -15,7 +13,7 @@ type ServiceCoverage struct {
 }
 
 type Repository interface {
-	UpdateServiceCoverage(serviceName string, coverage float32) error
+	UpdateServiceCoverage(ServiceCoverage) error
 	ListServiceCoverage() []ServiceCoverage
 }
 
@@ -24,11 +22,10 @@ type DynamodbRepository struct {
 	cl        dynamodb.Client
 }
 
-func (dr *DynamodbRepository) UpdateServiceCoverage(sn string, cov float32) (err error) {
+func (dr *DynamodbRepository) UpdateServiceCoverage(sc ServiceCoverage) (err error) {
+	item, _ := attributevalue.MarshalMap(sc)
 	_, err = dr.cl.PutItem(context.TODO(), &dynamodb.PutItemInput{
-		Item: map[string]types.AttributeValue{
-			"service_name": &types.AttributeValueMemberS{Value: sn},
-			"coverage":     &types.AttributeValueMemberN{Value: fmt.Sprintf("%.2f", cov)}},
+		Item:      item,
 		TableName: &dr.tableName})
 	return
 }
@@ -43,15 +40,14 @@ type LocalRepository struct {
 	Services []ServiceCoverage
 }
 
-func (lr *LocalRepository) UpdateServiceCoverage(sn string, cov float32) (err error) {
+func (lr *LocalRepository) UpdateServiceCoverage(sc ServiceCoverage) (err error) {
 	for i, v := range lr.Services {
-		if v.ServiceName == sn {
-			lr.Services[i].Coverage = cov
+		if v.ServiceName == sc.ServiceName {
+			lr.Services[i].Coverage = sc.Coverage
 			return
 		}
 	}
-	newServiceCoverage := ServiceCoverage{ServiceName: sn, Coverage: cov}
-	lr.Services = append(lr.Services, newServiceCoverage)
+	lr.Services = append(lr.Services, sc)
 	return
 }
 

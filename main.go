@@ -22,7 +22,7 @@ func updateHandler(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}
-	repo.UpdateServiceCoverage(body.Payload.ServiceName, body.Payload.Coverage)
+	repo.UpdateServiceCoverage(body.Payload)
 	fmt.Fprintf(w, "service name: %v \ncoverage: %v", body.Payload.ServiceName, body.Payload.Coverage)
 }
 
