@@ -19,19 +19,19 @@ type Repository interface {
 
 type DynamodbRepository struct {
 	TableName string
-	CL        dynamodb.Client
+	Cl        dynamodb.Client
 }
 
 func (dr *DynamodbRepository) UpdateServiceCoverage(sc ServiceCoverage) (err error) {
 	item, _ := attributevalue.MarshalMap(sc)
-	_, err = dr.cl.PutItem(context.TODO(), &dynamodb.PutItemInput{
+	_, err = dr.Cl.PutItem(context.TODO(), &dynamodb.PutItemInput{
 		Item:      item,
-		TableName: &dr.tableName})
+		TableName: &dr.TableName})
 	return
 }
 
 func (dr *DynamodbRepository) ListServiceCoverage() (sc []ServiceCoverage) {
-	scan, _ := dr.cl.Scan(context.TODO(), &dynamodb.ScanInput{TableName: &dr.tableName})
+	scan, _ := dr.Cl.Scan(context.TODO(), &dynamodb.ScanInput{TableName: &dr.TableName})
 	attributevalue.UnmarshalListOfMaps(scan.Items, sc)
 	return
 }
