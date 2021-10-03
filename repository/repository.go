@@ -18,8 +18,8 @@ type Repository interface {
 }
 
 type DynamodbRepository struct {
-	tableName string
-	cl        dynamodb.Client
+	TableName string
+	CL        dynamodb.Client
 }
 
 func (dr *DynamodbRepository) UpdateServiceCoverage(sc ServiceCoverage) (err error) {
