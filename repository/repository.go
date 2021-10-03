@@ -2,14 +2,17 @@ package repository
 
 import (
 	"context"
+	"log"
+	"os"
 
+	"github.com/aws/aws-sdk-go-v2/config"
 	"github.com/aws/aws-sdk-go-v2/feature/dynamodb/attributevalue"
 	"github.com/aws/aws-sdk-go-v2/service/dynamodb"
 )
 
 type ServiceCoverage struct {
-	ServiceName string  `json:"service_name"`
-	Coverage    float32 `json:"coverage"`
+	ServiceName string  `json:"service_name" dynamodbav:"service_name"`
+	Coverage    float32 `json:"coverage" dynamodbav:"coverage"`
 }
 
 type Repository interface {
@@ -17,9 +20,18 @@ type Repository interface {
 	ListServiceCoverage() []ServiceCoverage
 }
 
+func ConfigureRepository(repo *Repository) {
+	cfg, err := config.LoadDefaultConfig(context.TODO())
+	if err != nil {
+		log.Fatalf("unable to load SDK config, %v", err)
+	}
+	cl := dynamodb.NewFromConfig(cfg)
+	*repo = &DynamodbRepository{Cl: cl, TableName: os.Getenv("QA_TABLE_NAME")}
+}
+
 type DynamodbRepository struct {
 	TableName string
-	Cl        dynamodb.Client
+	Cl        *dynamodb.Client
 }
 
 func (dr *DynamodbRepository) UpdateServiceCoverage(sc ServiceCoverage) (err error) {
@@ -32,7 +44,7 @@ func (dr *DynamodbRepository) UpdateServiceCoverage(sc ServiceCoverage) (err err
 
 func (dr *DynamodbRepository) ListServiceCoverage() (sc []ServiceCoverage) {
 	scan, _ := dr.Cl.Scan(context.TODO(), &dynamodb.ScanInput{TableName: &dr.TableName})
-	attributevalue.UnmarshalListOfMaps(scan.Items, sc)
+	attributevalue.UnmarshalListOfMaps(scan.Items, &sc)
 	return
 }
 

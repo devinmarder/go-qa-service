@@ -10,7 +10,7 @@ import (
 	"github.com/devinmarder/go-qa-service/repository"
 )
 
-var repo repository.LocalRepository
+var repo repository.Repository
 
 type Body struct {
 	Payload repository.ServiceCoverage `json:"payload"`
@@ -40,6 +40,7 @@ func apiHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func main() {
+	repository.ConfigureRepository(&repo)
 	port := os.Args[1]
 	http.HandleFunc("/", updateHandler)
 	http.HandleFunc("/stats", webHandler)
