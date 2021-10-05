@@ -17,7 +17,7 @@ type ServiceCoverage struct {
 
 type Repository interface {
 	UpdateServiceCoverage(ServiceCoverage) error
-	ListServiceCoverage() []ServiceCoverage
+	ListServiceCoverage() ([]ServiceCoverage, error)
 }
 
 func ConfigureRepository(repo *Repository) {
@@ -42,8 +42,8 @@ func (dr *DynamodbRepository) UpdateServiceCoverage(sc ServiceCoverage) (err err
 	return
 }
 
-func (dr *DynamodbRepository) ListServiceCoverage() (sc []ServiceCoverage) {
-	scan, _ := dr.Cl.Scan(context.TODO(), &dynamodb.ScanInput{TableName: &dr.TableName})
+func (dr *DynamodbRepository) ListServiceCoverage() (sc []ServiceCoverage, err error) {
+	scan, err := dr.Cl.Scan(context.TODO(), &dynamodb.ScanInput{TableName: &dr.TableName})
 	attributevalue.UnmarshalListOfMaps(scan.Items, &sc)
 	return
 }
@@ -63,7 +63,7 @@ func (lr *LocalRepository) UpdateServiceCoverage(sc ServiceCoverage) (err error)
 	return
 }
 
-func (lr *LocalRepository) ListServiceCoverage() (sc []ServiceCoverage) {
+func (lr *LocalRepository) ListServiceCoverage() (sc []ServiceCoverage, err error) {
 	sc = lr.Services
 	return
 }

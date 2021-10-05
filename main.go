@@ -22,20 +22,37 @@ func updateHandler(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}
-	repo.UpdateServiceCoverage(body.Payload)
+	err := repo.UpdateServiceCoverage(body.Payload)
+	if err != nil {
+		log.Print(err)
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
 	fmt.Fprintf(w, "service name: %v \ncoverage: %v", body.Payload.ServiceName, body.Payload.Coverage)
 }
 
 func webHandler(w http.ResponseWriter, r *http.Request) {
 	fmt.Fprint(w, "<h1>Services QA Status</h1> <dl> <hr>")
-	for _, serviceCoverage := range repo.ListServiceCoverage() {
-		fmt.Fprintf(w, "<dt>%v</dt><dd>coverage: %v</dd> <hr>", serviceCoverage.ServiceName, serviceCoverage.Coverage)
+	serviceCoverage, err := repo.ListServiceCoverage()
+	if err != nil {
+		log.Print(err)
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+	for _, sc := range serviceCoverage {
+		fmt.Fprintf(w, "<dt>%v</dt><dd>coverage: %v</dd> <hr>", sc.ServiceName, sc.Coverage)
 	}
 	fmt.Fprint(w, "<dl>")
 }
 
 func apiHandler(w http.ResponseWriter, r *http.Request) {
-	b, _ := json.Marshal(repo.ListServiceCoverage())
+	scl, err := repo.ListServiceCoverage()
+	if err != nil {
+		log.Print()
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+	b, _ := json.Marshal(scl)
 	fmt.Fprint(w, string(b))
 }
 
