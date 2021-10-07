@@ -3,14 +3,18 @@ package main
 import (
 	"encoding/json"
 	"fmt"
+	"io"
 	"log"
 	"net/http"
 	"os"
 
+	"github.com/devinmarder/go-qa-service/event"
 	"github.com/devinmarder/go-qa-service/repository"
 )
 
 var repo repository.Repository
+
+var eventChan chan string
 
 type Body struct {
 	Payload repository.ServiceCoverage `json:"payload"`
@@ -18,7 +22,8 @@ type Body struct {
 
 func updateHandler(w http.ResponseWriter, r *http.Request) {
 	var body Body
-	if err := json.NewDecoder(r.Body).Decode(&body); err != nil {
+	b, _ := io.ReadAll(r.Body)
+	if err := json.Unmarshal(b, &body); err != nil {
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}
@@ -28,6 +33,7 @@ func updateHandler(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
+	eventChan <- string(b)
 	fmt.Fprintf(w, "service name: %v \ncoverage: %v", body.Payload.ServiceName, body.Payload.Coverage)
 }
 
@@ -58,9 +64,17 @@ func apiHandler(w http.ResponseWriter, r *http.Request) {
 
 func main() {
 	repository.ConfigureRepository(&repo)
+
+	eventChan = make(chan string)
+	go event.RunEventProducer(eventChan)
+
+	go event.RunEventlistener()
+
 	port := os.Args[1]
+
 	http.HandleFunc("/", updateHandler)
 	http.HandleFunc("/stats", webHandler)
 	http.HandleFunc("/api/stats", apiHandler)
+
 	log.Fatal(http.ListenAndServe(":"+port, nil))
 }
