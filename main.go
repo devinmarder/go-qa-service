@@ -53,7 +53,7 @@ func webHandler(w http.ResponseWriter, r *http.Request) {
 func apiHandler(w http.ResponseWriter, r *http.Request) {
 	scl, err := repo.ListServiceCoverage()
 	if err != nil {
-		log.Print()
+		log.Print(err)
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
