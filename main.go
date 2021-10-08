@@ -59,7 +59,7 @@ func apiHandler(w http.ResponseWriter, r *http.Request) {
 	fmt.Fprint(w, string(b))
 }
 
-func attachEvent(fn func(http.ResponseWriter, *http.Request), msg chan string) http.HandlerFunc {
+func attachEvent(fn func(http.ResponseWriter, *http.Request), eventChan chan string) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		var buf bytes.Buffer
 		tee := io.TeeReader(r.Body, &buf)
