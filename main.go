@@ -1,6 +1,7 @@
 package main
 
 import (
+	"bytes"
 	"encoding/json"
 	"fmt"
 	"io"
@@ -22,8 +23,7 @@ type Body struct {
 
 func updateHandler(w http.ResponseWriter, r *http.Request) {
 	var body Body
-	b, _ := io.ReadAll(r.Body)
-	if err := json.Unmarshal(b, &body); err != nil {
+	if err := json.NewDecoder(r.Body).Decode(&body); err != nil {
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}
@@ -33,7 +33,6 @@ func updateHandler(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
-	eventChan <- string(b)
 	fmt.Fprintf(w, "service name: %v \ncoverage: %v", body.Payload.ServiceName, body.Payload.Coverage)
 }
 
@@ -62,6 +61,16 @@ func apiHandler(w http.ResponseWriter, r *http.Request) {
 	fmt.Fprint(w, string(b))
 }
 
+func attachEvent(fn func(http.ResponseWriter, *http.Request), msg chan string) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		var buf bytes.Buffer
+		tee := io.TeeReader(r.Body, &buf)
+		r.Body = io.NopCloser(tee)
+		fn(w, r)
+		eventChan <- buf.String()
+	}
+}
+
 func main() {
 	repository.ConfigureRepository(&repo)
 
@@ -72,7 +81,7 @@ func main() {
 
 	port := os.Args[1]
 
-	http.HandleFunc("/", updateHandler)
+	http.HandleFunc("/", attachEvent(updateHandler, eventChan))
 	http.HandleFunc("/stats", webHandler)
 	http.HandleFunc("/api/stats", apiHandler)
 
