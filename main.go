@@ -15,8 +15,6 @@ import (
 
 var repo repository.Repository
 
-var eventChan chan string
-
 type Body struct {
 	Payload repository.ServiceCoverage `json:"payload"`
 }
@@ -74,7 +72,7 @@ func attachEvent(fn func(http.ResponseWriter, *http.Request), msg chan string) h
 func main() {
 	repository.ConfigureRepository(&repo)
 
-	eventChan = make(chan string)
+	eventChan := make(chan string)
 	go event.RunEventProducer(eventChan)
 
 	go event.RunEventlistener()
