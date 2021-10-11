@@ -6,10 +6,10 @@ import (
 	"github.com/streadway/amqp"
 )
 
-//queueName is the queue that the consumer listens to.
+// queueName is the queue that the consumer listens to.
 const queueName = "test_queue"
 
-//RunEventlistenter consumes and logs events on the queue.
+// RunEventlistenter consumes and logs events on the queue.
 func RunEventlistener() {
 	conn, err := amqp.Dial("amqp://guest:guest@localhost:5672/")
 	failOnError(err, "Failed to connect to RabbitMQ")

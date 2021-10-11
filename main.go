@@ -13,18 +13,20 @@ import (
 	"github.com/devinmarder/go-qa-service/repository"
 )
 
-//repo is the repository interface used by the handelers.
+// repo is the repository interface used by the handelers.
 var repo repository.Repository
 
-//Body represents the top-level fields of the request.
+// Body represents the top-level fields of the request.
 type Body struct {
 	Payload repository.ServiceCoverage `json:"payload"`
 }
 
-//updateHandler is used for updating the repo with the coverage statistics provided in the request.
-//The request body must be json formatted with fields compatible with the Body struct.
+// updateHandler is used for updating the repo with the coverage statistics provided in the request.
+// The request body must be json formatted with fields compatible with the Body struct.
 func updateHandler(w http.ResponseWriter, r *http.Request) {
 	var body Body
+
+	// Decodes
 	if err := json.NewDecoder(r.Body).Decode(&body); err != nil {
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
@@ -38,7 +40,7 @@ func updateHandler(w http.ResponseWriter, r *http.Request) {
 	fmt.Fprintf(w, "service name: %v \ncoverage: %v", body.Payload.ServiceName, body.Payload.Coverage)
 }
 
-//webHundler writes an html formatted response of the items contained in the repository.
+// webHundler writes an html formatted response of the items contained in the repository.
 func webHandler(w http.ResponseWriter, r *http.Request) {
 	fmt.Fprint(w, "<h1>Services QA Status</h1> <dl> <hr>")
 	serviceCoverage, err := repo.ListServiceCoverage()
@@ -53,7 +55,7 @@ func webHandler(w http.ResponseWriter, r *http.Request) {
 	fmt.Fprint(w, "<dl>")
 }
 
-//apiHandler write a json formatted respose of the items contained in the repository.
+// apiHandler write a json formatted respose of the items contained in the repository.
 func apiHandler(w http.ResponseWriter, r *http.Request) {
 	scl, err := repo.ListServiceCoverage()
 	if err != nil {
@@ -65,7 +67,7 @@ func apiHandler(w http.ResponseWriter, r *http.Request) {
 	fmt.Fprint(w, string(b))
 }
 
-//attachEvent wraps a provided handler function and writes its body to the provided channel.
+// attachEvent wraps a provided handler function and writes its body to the provided channel.
 func attachEvent(fn func(http.ResponseWriter, *http.Request), eventChan chan string) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		var buf bytes.Buffer
@@ -77,20 +79,20 @@ func attachEvent(fn func(http.ResponseWriter, *http.Request), eventChan chan str
 }
 
 func main() {
-	//Configure the repository.
+	// Configure the repository.
 	repository.ConfigureRepository(&repo)
 
-	//Create channel for writing events and start gorutine to produce events written to channel.
+	// Create channel for writing events and start gorutine to produce events written to channel.
 	eventChan := make(chan string)
 	go event.RunEventProducer(eventChan)
 
-	//Start a test listener to log events.
+	// Start a test listener to log events.
 	go event.RunEventlistener()
 
-	//get port from args.
+	// get port from args.
 	port := os.Args[1]
 
-	//Add handlers to the default HTTP ServeMux.
+	// Add handlers to the default HTTP ServeMux.
 	http.HandleFunc("/", attachEvent(updateHandler, eventChan))
 	http.HandleFunc("/stats", webHandler)
 	http.HandleFunc("/api/stats", apiHandler)
