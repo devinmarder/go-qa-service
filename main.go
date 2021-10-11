@@ -26,11 +26,12 @@ type Body struct {
 func updateHandler(w http.ResponseWriter, r *http.Request) {
 	var body Body
 
-	// Decodes
+	// Decodes reqest body.
 	if err := json.NewDecoder(r.Body).Decode(&body); err != nil {
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}
+	// Updates repository.
 	err := repo.UpdateServiceCoverage(body.Payload)
 	if err != nil {
 		log.Print(err)
@@ -43,12 +44,14 @@ func updateHandler(w http.ResponseWriter, r *http.Request) {
 // webHundler writes an html formatted response of the items contained in the repository.
 func webHandler(w http.ResponseWriter, r *http.Request) {
 	fmt.Fprint(w, "<h1>Services QA Status</h1> <dl> <hr>")
+	// Get list of service coverage opjects.
 	serviceCoverage, err := repo.ListServiceCoverage()
 	if err != nil {
 		log.Print(err)
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
+	// Generate HTML response.
 	for _, sc := range serviceCoverage {
 		fmt.Fprintf(w, "<dt>%v</dt><dd>coverage: %v</dd> <hr>", sc.ServiceName, sc.Coverage)
 	}
@@ -63,6 +66,7 @@ func apiHandler(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
+	// Generate Json response.
 	b, _ := json.Marshal(scl)
 	fmt.Fprint(w, string(b))
 }
@@ -72,8 +76,10 @@ func attachEvent(fn func(http.ResponseWriter, *http.Request), eventChan chan str
 	return func(w http.ResponseWriter, r *http.Request) {
 		var buf bytes.Buffer
 		tee := io.TeeReader(r.Body, &buf)
+		// Replace body with tee to write to make stream available for event.
 		r.Body = io.NopCloser(tee)
 		fn(w, r)
+		// Writes request to event to channel
 		eventChan <- buf.String()
 	}
 }
