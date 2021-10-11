@@ -5,7 +5,7 @@ This service uses DynamoDB for persistant storage.
 
 ## Configuration
 The server uses the [aws-sdk-go-v2](https://github.com/aws/aws-sdk-go-v2) will load configuration from environment variables, 
-AWS shared configuration file (~/.aws/config), and AWS shared credentials file (~/.aws/credentials).
+AWS shared configuration file (\~/.aws/config), and AWS shared credentials file (\~/.aws/credentials).
 
 The DynamoDB table must be specifide with the environment variable `QA_TABLE_NAME` corresponding to the table name in the configured default AWS region.
 
