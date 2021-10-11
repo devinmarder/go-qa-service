@@ -13,7 +13,7 @@ The server must be launched with the specified port as an arguement.
 ```console
 ./go-qa-service 8080
 ```
-ensure that the credentials of the server enable reading and writing items to DynamoDB.
+Ensure that the credentials of the server enable reading and writing items to DynamoDB.
 
 ## Routes
 The api has the following routes:  
