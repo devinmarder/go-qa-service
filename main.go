@@ -41,7 +41,7 @@ func updateHandler(w http.ResponseWriter, r *http.Request) {
 	fmt.Fprintf(w, "service name: %v \ncoverage: %v", body.Payload.ServiceName, body.Payload.Coverage)
 }
 
-// webHundler writes an html formatted response of the items contained in the repository.
+// webHandler writes an html formatted response of the items contained in the repository.
 func webHandler(w http.ResponseWriter, r *http.Request) {
 	fmt.Fprint(w, "<h1>Services QA Status</h1> <dl> <hr>")
 	// Get list of service coverage opjects.
