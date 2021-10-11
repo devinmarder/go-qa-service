@@ -17,16 +17,19 @@ Ensure that the credentials of the server enable reading and writing items to Dy
 
 ## Routes
 The api has the following routes:  
-`/` This is used for updating service coverage. The request body must be a JSON in the following format:
-```json
-{
-  "payload": {
-    "service_name": "test-service",
-    "coverage": 80}
-}
-```
-`/api/stats` This returns a json formatted response of all the services and their coverage.  
-`/stats` This returns an HTML response of all the services and their coverage.
+* `/` 
+  * Used for updating service coverage. The request body must be a JSON in the following format:
+    ```json
+    {
+      "payload": {
+        "service_name": "test-service",
+        "coverage": 80}
+    }
+    ```
+* `/api/stats` 
+  * Returns a json formatted response of all the services and their coverage.  
+* `/stats` 
+  * Returns an HTML response of all the services and their coverage.
 
 ## Events
 Calls to update the service coverage creates an AMPQ message that are published to the `qa.events` exchange on `amqp://guest:guest@localhost:5672/`.  
