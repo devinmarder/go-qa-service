@@ -6,8 +6,10 @@ import (
 	"github.com/streadway/amqp"
 )
 
+//ExchangeName is the name used for the exchange that the event is published to.
 const ExchangeName = "qa.events"
 
+//RunEventProducer listens to mesages sent to the channel and publishes them to the Exchange.
 func RunEventProducer(msgs chan string) {
 	conn, err := amqp.Dial("amqp://guest:guest@localhost:5672/")
 	failOnError(err, "Failed to connect to RabbitMQ")
@@ -28,6 +30,7 @@ func RunEventProducer(msgs chan string) {
 	)
 	failOnError(err, "Failed declare exchange")
 
+	//Listen for events on channel.
 	for msg := range msgs {
 		err := ch.Publish(
 			ExchangeName, // exchange
@@ -43,6 +46,7 @@ func RunEventProducer(msgs chan string) {
 	}
 }
 
+//failOnError logs the error and Terminates the process.
 func failOnError(err error, msg string) {
 	if err != nil {
 		log.Fatalf("%s: %s", msg, err)
