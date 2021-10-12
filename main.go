@@ -43,7 +43,6 @@ func updateHandler(w http.ResponseWriter, r *http.Request) {
 
 // webHandler writes an html formatted response of the items contained in the repository.
 func webHandler(w http.ResponseWriter, r *http.Request) {
-	fmt.Fprint(w, "<h1>Services QA Status</h1> <dl> <hr>")
 	// Get list of service coverage opjects.
 	serviceCoverage, err := repo.ListServiceCoverage()
 	if err != nil {
@@ -52,8 +51,9 @@ func webHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	// Generate HTML response.
+	fmt.Fprint(w, "<h1>Services QA Status</h1> <dl> <hr>")
 	for _, sc := range serviceCoverage {
-		fmt.Fprintf(w, "<dt>%v</dt><dd>coverage: %v</dd> <hr>", sc.ServiceName, sc.Coverage)
+		fmt.Fprintf(w, "<dt>%v</dt><dd>coverage: %v%%</dd> <hr>", sc.ServiceName, sc.Coverage)
 	}
 	fmt.Fprint(w, "<dl>")
 }
