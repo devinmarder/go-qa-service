@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
+	"io/ioutil"
 	"log"
 	"net/http"
 	"os"
@@ -77,7 +78,7 @@ func attachEvent(fn func(http.ResponseWriter, *http.Request), eventChan chan str
 		var buf bytes.Buffer
 		tee := io.TeeReader(r.Body, &buf)
 		// Replace body with tee to write to make stream available for event.
-		r.Body = io.NopCloser(tee)
+		r.Body = ioutil.NopCloser(tee)
 		fn(w, r)
 		// Writes request to event to channel
 		eventChan <- buf.String()
